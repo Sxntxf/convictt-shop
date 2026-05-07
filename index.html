@@ -3,145 +3,262 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CONVICTT | Urban Elite</title>
+    <title>CONVICTT | Elite Wear</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { 
-            background: radial-gradient(circle at center, #001205 0%, #000000 100%);
-            color: #ffffff; 
-            font-family: 'Inter', sans-serif; 
-            margin: 0; 
-            overflow-x: hidden; 
-        }
+        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; }
+        :root { --neon: #00FF41; }
         
-        :root { --neon-green: #00FF41; }
-        .neon-accent { color: var(--neon-green); text-shadow: 0 0 8px rgba(0, 255, 65, 0.6); }
-        
-        #clock-container {
-            border-left: 2px solid var(--neon-green);
-            padding-left: 10px;
-            background: rgba(0, 255, 65, 0.03);
+        header {
+            position: fixed; top: 0; width: 100%; z-index: 100;
+            background: rgba(0,0,0,0.95); backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 255, 65, 0.1);
         }
-        #clock { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--neon-green); }
 
-        .border-premium { 
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            background: rgba(255, 255, 255, 0.01);
-            backdrop-filter: blur(10px);
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
-        }
+        .content-section { display: none; opacity: 0; transform: translateY(20px); transition: all 0.5s ease; }
+        .content-section.active { display: block; opacity: 1; transform: translateY(0); }
+
+        .nav-btn { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #555; cursor: pointer; transition: 0.3s; font-weight: 700; }
+        .nav-btn.active-nav { color: var(--neon); border-bottom: 2px solid var(--neon); }
+
+        .hero-title { font-size: clamp(3.5rem, 15vw, 10rem); font-weight: 900; line-height: 0.8; letter-spacing: -0.05em; font-style: italic; }
         
-        .border-premium:hover { 
-            border-color: var(--neon-green); 
+        .product-card { 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+            background: #050505; 
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.3s;
+        }
+        .product-card:hover { 
+            transform: scale(1.03);
+            border-color: var(--neon);
             box-shadow: 0 0 30px rgba(0, 255, 65, 0.1);
-            transform: translateY(-10px) scale(1.02);
         }
 
-        .neon-button { 
-            border: 1px solid var(--neon-green); 
-            color: var(--neon-green); 
-            background: transparent;
-            display: block;
-            text-align: center;
-            transition: all 0.4s ease;
-            cursor: pointer;
+        .btn-main { border: 1px solid var(--neon); color: var(--neon); font-size: 10px; font-weight: 900; text-transform: uppercase; padding: 15px; transition: 0.3s; width: 100%; cursor: pointer; }
+        .btn-main:hover { background: var(--neon); color: #000; }
+
+        #cart-modal, #payment-modal, #social-modal {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98);
+            z-index: 200; align-items: center; justify-content: center;
         }
         
-        .neon-button:hover { 
-            background: var(--neon-green); 
-            color: #000000; 
-            box-shadow: 0 0 40px var(--neon-green); 
-        }
+        .dark-card { width: 92%; max-width: 500px; background: #050505; color: #fff; padding: 30px; border: 1px solid rgba(255,255,255,0.1); }
 
-        .scanline {
-            width: 100%; height: 100px; z-index: 99; pointer-events: none;
-            background: linear-gradient(0deg, rgba(0, 255, 65, 0) 0%, rgba(0, 255, 65, 0.02) 50%, rgba(0, 255, 65, 0) 100%);
-            position: absolute; animation: scan 8s linear infinite;
+        .social-link {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 15px; border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 10px; transition: 0.3s; cursor: pointer;
         }
-        @keyframes scan { 0% { top: -100px; } 100% { top: 100%; } }
+        .social-link:hover { border-color: var(--neon); background: rgba(0,255,65,0.05); }
 
-        img.product-img { width: 100%; height: 100%; object-fit: contain; }
+        #toast {
+            position: fixed; top: 90px; right: -300px; 
+            background: #000; border: 1px solid var(--neon);
+            padding: 15px 20px; color: var(--neon); font-size: 10px;
+            text-transform: uppercase; font-weight: 900;
+            z-index: 1000; transition: 0.5s;
+        }
+        #toast.visible { right: 20px; }
     </style>
 </head>
 <body>
-    <div class="scanline"></div>
 
-    <nav class="p-8 flex justify-between items-center max-w-7xl mx-auto">
-        <div id="clock-container">
-            <div class="text-[8px] uppercase tracking-widest opacity-40">Live Terminal</div>
-            <div id="clock" class="text-sm">00:00:00</div>
-        </div>
-        <div class="text-right">
-            <div class="text-[10px] font-black tracking-[0.4em] text-white/40 mb-1 uppercase">Collection</div>
-            <div class="text-xs font-bold neon-accent uppercase tracking-widest">Drop 01 // Active</div>
-        </div>
-    </nav>
+    <div id="toast">Añadido correctamente</div>
 
-    <section class="min-h-[60vh] flex flex-col justify-center items-center px-6 text-center">
-        <div class="mb-10 relative">
-            <div class="absolute inset-0 bg-green-500/10 blur-[100px] rounded-full"></div>
-            <img src="logo_convictt.png" alt="CONVICTT Logo" class="relative max-w-[240px] md:max-w-[310px] h-auto">
-        </div>
-        <h1 class="text-7xl md:text-[115px] font-black uppercase leading-[0.8] tracking-tighter mb-8 italic">
-            URBAN <br> <span class="text-white">ELITE</span>
-        </h1>
-        <p class="text-gray-400 text-[10px] uppercase tracking-[0.6em] font-bold">Estilo sin cadenas</p>
-    </section>
-
-    <section class="py-20 px-6 max-w-7xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-            
-            <div class="border-premium p-10 text-center flex flex-col">
-                <div class="w-full aspect-square bg-zinc-950 mb-8 flex items-center justify-center border border-white/5 overflow-hidden">
-                    <img src="boss_roja.png" alt="Sudadera Boss Roja" class="product-img">
-                </div>
-                <h3 class="text-lg font-black uppercase tracking-tighter">SUDADERA BOSS RED</h3>
-                <p class="text-[9px] neon-accent mt-2 mb-6 uppercase font-bold tracking-widest">Tallas XS a M</p>
-                <a href="https://wa.me/5218121513089?text=Hola%20CONVICTT,%20me%20interesa%20la%20Sudadera%20BOSS%20ROJA" target="_blank" class="neon-button py-3 text-[9px] font-black uppercase tracking-widest mt-auto">Solicitar Información</a>
+    <header>
+        <nav class="p-6 flex justify-between items-center max-w-7xl mx-auto">
+            <div class="border-l-2 border-green-500 pl-3 font-mono text-[10px] text-green-500" id="clock">00:00:00</div>
+            <div class="flex gap-4 md:gap-8">
+                <span onclick="showSection('hero')" class="nav-btn active-nav" id="btn-hero">Inicio</span>
+                <span onclick="showSection('catalog')" class="nav-btn" id="btn-catalog">Colección</span>
+                <span onclick="toggleSocial()" class="nav-btn">Redes</span>
+                <span onclick="showSection('about')" class="nav-btn" id="btn-about">Nosotros</span>
+                <span onclick="toggleCart()" class="nav-btn" style="color:white">🛒(<span id="cart-counter">0</span>)</span>
             </div>
+        </nav>
+    </header>
 
-            <div class="border-premium p-10 text-center flex flex-col">
-                <div class="w-full aspect-square bg-zinc-950 mb-8 flex items-center justify-center border border-white/5 overflow-hidden">
-                    <img src="kenzo_tiger.png" alt="Playera Kenzo Tiger" class="product-img">
-                </div>
-                <h3 class="text-lg font-black uppercase tracking-tighter">PLAYERA KENZO TIGER</h3>
-                <p class="text-[9px] neon-accent mt-2 mb-6 uppercase font-bold tracking-widest">Tallas XS a M</p>
-                <a href="https://wa.me/5218121513089?text=Hola%20CONVICTT,%20me%20interesa%20la%20Playera%20KENZO%20TIGER" target="_blank" class="neon-button py-3 text-[9px] font-black uppercase tracking-widest mt-auto">Solicitar Información</a>
+    <main class="pt-20">
+        
+        <section id="hero" class="content-section active min-h-[90vh] flex flex-col justify-center items-center text-center px-6">
+            <div class="w-full flex justify-center mb-6">
+                <img src="logo_convictt.png" class="max-w-[180px] md:max-w-[350px] drop-shadow-[0_0_25px_rgba(0,255,65,0.2)]">
             </div>
+            <h1 class="hero-title uppercase italic">CONVICTT</h1>
+            <p class="mt-6 text-[10px] md:text-[11px] text-green-500 uppercase tracking-[1.2em] font-bold">Calidad G5 // Nuevo León</p>
+            <button onclick="showSection('catalog')" class="mt-14 btn-main w-auto px-12 tracking-[0.3em]">Explorar Catálogo</button>
+        </section>
 
-            <div class="border-premium p-10 text-center flex flex-col">
-                <div class="w-full aspect-square bg-zinc-950 mb-8 flex items-center justify-center border border-white/5 overflow-hidden">
-                    <img src="boss_crema.png" alt="Sudadera Boss Crema" class="product-img">
+        <section id="catalog" class="content-section max-w-7xl mx-auto px-6 py-20">
+            <h2 class="text-center text-4xl md:text-5xl font-black italic mb-16 uppercase tracking-tighter">Lanzamiento 01</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+                
+                <div class="product-card p-6 flex flex-col items-center text-center">
+                    <img src="boss_roja.png" class="w-full aspect-square object-contain bg-zinc-950 p-6 mb-6">
+                    <h3 class="font-black uppercase italic text-lg">Sudadera Boss Red</h3>
+                    <p class="text-[9px] text-green-500 my-2 font-bold uppercase tracking-widest">G5 High-End // Calidad Premium</p>
+                    <div class="mb-6">
+                        <p class="text-[9px] opacity-40 uppercase">Precio Normal: <span class="line-through">$1,299</span></p>
+                        <p class="text-lg font-black font-mono text-white">Precio Preventa: <span class="text-green-500">$699 MXN</span></p>
+                    </div>
+                    <select id="size-1" class="bg-zinc-900 border border-zinc-800 p-3 text-[10px] mb-4 uppercase w-full">
+                        <option value="XS">Talla XS</option><option value="S">Talla S</option><option value="M">Talla M</option>
+                    </select>
+                    <button onclick="addToCart('Sudadera Boss Red', 699, 'size-1')" class="btn-main">Agregar al Carrito</button>
                 </div>
-                <h3 class="text-lg font-black uppercase tracking-tighter">SUDADERA BOSS CREAM</h3>
-                <p class="text-[9px] neon-accent mt-2 mb-6 uppercase font-bold tracking-widest">Tallas XS a M</p>
-                <a href="https://wa.me/5218121513089?text=Hola%20CONVICTT,%20me%20interesa%20la%20Sudadera%20BOSS%20CREMA" target="_blank" class="neon-button py-3 text-[9px] font-black uppercase tracking-widest mt-auto">Solicitar Información</a>
+
+                <div class="product-card p-6 flex flex-col items-center text-center">
+                    <img src="kenzo_tiger.png" class="w-full aspect-square object-contain bg-zinc-950 p-6 mb-6">
+                    <h3 class="font-black uppercase italic text-lg">Playera Kenzo Tiger</h3>
+                    <p class="text-[9px] text-green-500 my-2 font-bold uppercase tracking-widest">G5 High-End // Bordado Premium</p>
+                    <div class="mb-6">
+                        <p class="text-[9px] opacity-40 uppercase">Precio Normal: <span class="line-through">$1,100</span></p>
+                        <p class="text-lg font-black font-mono text-white">Precio Preventa: <span class="text-green-500">$699 MXN</span></p>
+                    </div>
+                    <select id="size-2" class="bg-zinc-900 border border-zinc-800 p-3 text-[10px] mb-4 uppercase w-full">
+                        <option value="XS">Talla XS</option><option value="S">Talla S</option><option value="M">Talla M</option>
+                    </select>
+                    <button onclick="addToCart('Playera Kenzo Tiger', 699, 'size-2')" class="btn-main">Agregar al Carrito</button>
+                </div>
+
+                <div class="product-card p-6 flex flex-col items-center text-center">
+                    <img src="boss_crema.png" class="w-full aspect-square object-contain bg-zinc-950 p-6 mb-6">
+                    <h3 class="font-black uppercase italic text-lg">Sudadera Boss Cream</h3>
+                    <p class="text-[9px] text-green-500 my-2 font-bold uppercase tracking-widest">G5 High-End // Oversized Fit</p>
+                    <div class="mb-6">
+                        <p class="text-[9px] opacity-40 uppercase">Precio Normal: <span class="line-through">$1,299</span></p>
+                        <p class="text-lg font-black font-mono text-white">Precio Preventa: <span class="text-green-500">$699 MXN</span></p>
+                    </div>
+                    <select id="size-3" class="bg-zinc-900 border border-zinc-800 p-3 text-[10px] mb-4 uppercase w-full">
+                        <option value="XS">Talla XS</option><option value="S">Talla S</option><option value="M">Talla M</option>
+                    </select>
+                    <button onclick="addToCart('Sudadera Boss Cream', 699, 'size-3')" class="btn-main">Agregar al Carrito</button>
+                </div>
             </div>
+        </section>
 
-        </div>
-    </section>
-
-    <footer class="py-32 text-center border-t border-white/5 relative">
-        <div class="mb-12 max-w-xl mx-auto px-6">
-            <div class="text-xs neon-accent mb-4 uppercase tracking-[0.4em] font-bold italic">Acceso Exclusivo</div>
-            <h4 class="text-3xl font-black uppercase tracking-tighter mb-8">Únete a la Élite</h4>
-            <p class="text-gray-400 text-[10px] uppercase tracking-[0.2em] mb-10 leading-relaxed">
-                Debes confirmar tu preventa para asegurar tu lugar en el Drop 01. <br> Las piezas son limitadas y no habrá re-stock.
+        <section id="about" class="content-section max-w-4xl mx-auto px-6 py-20 text-center">
+            <h2 class="text-green-500 font-bold uppercase tracking-[0.5em] mb-12 italic">// NOSOTROS //</h2>
+            <p class="text-2xl md:text-3xl font-black italic mb-8">CONVICTT: EL NUEVO ESTÁNDAR URBANO.</p>
+            <p class="text-white/40 text-xs uppercase tracking-[0.2em] leading-loose mb-16">
+                Nacimos en Nuevo León con un solo objetivo: ofrecer la calidad G5 más alta del mercado sin los precios excesivos del retail. Seleccionamos cada pieza individualmente para garantizar que el estilo y la durabilidad sean de élite.
             </p>
-            <a href="https://wa.me/5218121513089?text=Hola%20CONVICTT,%20quiero%20confirmar%20mi%20preventa%20para%20el%20Drop%2001" target="_blank" 
-               class="neon-button inline-block px-12 py-5 text-[10px] font-black uppercase tracking-[0.4em]">
-                Confirmar Preventa
-            </a>
+            
+            <div class="bg-zinc-950 p-10 border border-white/5">
+                <h4 class="text-[10px] text-white font-bold uppercase tracking-widest mb-8 italic">Guía de Tallas</h4>
+                <div class="grid grid-cols-3 text-green-500 font-black mb-6 text-[9px]">
+                    <span>TALLA</span><span>PECHO (CM)</span><span>LARGO (CM)</span>
+                </div>
+                <div class="grid grid-cols-3 opacity-50 text-xs gap-y-4">
+                    <span>XS</span><span>90</span><span>65</span>
+                    <span>S</span><span>95</span><span>67</span>
+                    <span>M</span><span>100</span><span>70</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="social-modal">
+        <div class="dark-card">
+            <h2 class="text-2xl font-black uppercase italic mb-8 text-center">Encuéntranos</h2>
+            <div class="space-y-2">
+                <div class="social-link" onclick="window.open('https://instagram.com/tu_usuario')">
+                    <span class="text-[10px] font-bold tracking-widest uppercase">Instagram</span>
+                    <span class="text-green-500 font-mono">@CONVICTT.MX</span>
+                </div>
+                <div class="social-link" onclick="window.open('https://tiktok.com/@tu_usuario')">
+                    <span class="text-[10px] font-bold tracking-widest uppercase">TikTok</span>
+                    <span class="text-green-500 font-mono">@CONVICTT_OFICIAL</span>
+                </div>
+                <div class="social-link">
+                    <span class="text-[10px] font-bold tracking-widest uppercase">Ubicación</span>
+                    <span class="text-green-500 font-mono text-[9px]">NUEVO LEÓN, MX</span>
+                </div>
+            </div>
+            <p class="mt-8 text-center text-[9px] opacity-30 uppercase tracking-[0.3em]">Secure Wear & Limited Supply</p>
+            <button onclick="toggleSocial()" class="btn-main mt-8 py-3 text-[9px]">Cerrar Ventana</button>
         </div>
-        <p class="text-[8px] opacity-20 uppercase tracking-[1em] mt-20">&copy; 2026 CONVICTT // NLE_MEX</p>
-    </footer>
+    </div>
+
+    <div id="cart-modal">
+        <div class="dark-card">
+            <h2 class="text-2xl font-black uppercase italic mb-6 text-center">Tu Bolsa</h2>
+            <div id="cart-items-container" class="max-h-[35vh] overflow-y-auto mb-6 text-xs"></div>
+            <div class="flex justify-between items-center text-lg font-black mb-6 border-t border-white/10 pt-4">
+                <span>TOTAL:</span><span id="cart-total" class="text-green-500">$0 MXN</span>
+            </div>
+            <button onclick="checkoutWhatsApp()" class="btn-main mb-3">Pedir por WhatsApp</button>
+            <button onclick="openPayment()" class="w-full bg-white text-black font-black uppercase py-4 text-[10px] tracking-widest mb-4">Pago Directo</button>
+            <button onclick="toggleCart()" class="w-full text-[9px] uppercase opacity-40">Cerrar</button>
+        </div>
+    </div>
+
+    <div id="payment-modal">
+        <div class="dark-card text-center border-green-500/50">
+            <h2 class="text-xl font-black italic uppercase text-green-500 mb-4">Conexión Segura</h2>
+            <div class="w-10 h-10 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+            <p class="text-[9px] uppercase tracking-widest mb-8 opacity-60">Redirigiendo a terminal de pago...</p>
+            <button onclick="closePayment()" class="btn-main text-[9px] py-3 w-auto px-8">Cancelar</button>
+        </div>
+    </div>
 
     <script>
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleTimeString('en-GB', { hour12: false });
+        let cart = [];
+
+        function showSection(id) {
+            document.querySelectorAll('.content-section').forEach(s => {
+                s.classList.remove('active');
+                setTimeout(() => { s.style.display = 'none'; }, 100);
+            });
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-nav'));
+            setTimeout(() => {
+                const target = document.getElementById(id);
+                target.style.display = 'block';
+                setTimeout(() => target.classList.add('active'), 50);
+                const btn = document.getElementById('btn-' + id);
+                if(btn) btn.classList.add('active-nav');
+                window.scrollTo(0,0);
+            }, 200);
         }
+
+        function addToCart(name, price, sizeId) {
+            const size = document.getElementById(sizeId).value;
+            cart.push({ name, price, size });
+            updateCartUI();
+            const t = document.getElementById('toast');
+            t.classList.add('visible');
+            setTimeout(() => t.classList.remove('visible'), 2000);
+        }
+
+        function updateCartUI() {
+            const container = document.getElementById('cart-items-container');
+            const totalEl = document.getElementById('cart-total');
+            document.getElementById('cart-counter').innerText = cart.length;
+            let total = 0;
+            container.innerHTML = cart.length === 0 ? '<p class="text-center opacity-20 py-10 uppercase">Vacío</p>' : '';
+            cart.forEach((item, index) => {
+                total += item.price;
+                container.innerHTML += `<div class="flex justify-between py-3 border-b border-white/5"><div><p class="font-black uppercase">${item.name}</p><p class="text-[9px] text-green-500">${item.size}</p></div><button onclick="removeItem(${index})" class="text-red-500 font-bold">X</button></div>`;
+            });
+            totalEl.innerText = `$${total} MXN`;
+        }
+
+        function removeItem(index) { cart.splice(index, 1); updateCartUI(); }
+        function toggleCart() { const m = document.getElementById('cart-modal'); m.style.display = (m.style.display === 'flex') ? 'none' : 'flex'; }
+        function toggleSocial() { const m = document.getElementById('social-modal'); m.style.display = (m.style.display === 'flex') ? 'none' : 'flex'; }
+        function openPayment() { if (cart.length > 0) document.getElementById('payment-modal').style.display = 'flex'; }
+        function closePayment() { document.getElementById('payment-modal').style.display = 'none'; }
+
+        function checkoutWhatsApp() {
+            if (cart.length === 0) return;
+            let msg = "Hola CONVICTT, nuevo pedido:%0A";
+            cart.forEach(i => { msg += `• ${i.name} (${i.size})%0A`; });
+            msg += `TOTAL: ${document.getElementById('cart-total').innerText}`;
+            window.open(`https://wa.me/5218121513089?text=${msg}`, '_blank');
+        }
+
+        function updateClock() { document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-GB', { hour12: false }); }
         setInterval(updateClock, 1000);
         updateClock();
     </script>
