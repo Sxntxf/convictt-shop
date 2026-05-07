@@ -38,19 +38,33 @@
         .btn-main { border: 1px solid var(--neon); color: var(--neon); font-size: 10px; font-weight: 900; text-transform: uppercase; padding: 15px; transition: 0.3s; width: 100%; cursor: pointer; }
         .btn-main:hover { background: var(--neon); color: #000; }
 
-        #cart-modal, #payment-modal, #social-modal {
+        /* CARRITO LATERAL */
+        #cart-modal { display: none; position: fixed; inset: 0; z-index: 300; }
+        .cart-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); }
+        .cart-panel { 
+            position: absolute; right: 0; top: 0; bottom: 0; 
+            width: 100%; max-width: 420px; background: #000; 
+            border-left: 1px solid rgba(0,255,65,0.15);
+            display: flex; flex-direction: column; padding: 25px;
+            animation: slideIn 0.4s ease-out;
+        }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+        .cart-item-ui {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        #social-modal {
             display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98);
             z-index: 200; align-items: center; justify-content: center;
         }
-        
-        .dark-card { width: 92%; max-width: 500px; background: #050505; color: #fff; padding: 30px; border: 1px solid rgba(255,255,255,0.1); }
-
-        .social-link {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 15px; border: 1px solid rgba(255,255,255,0.05);
-            margin-bottom: 10px; transition: 0.3s; cursor: pointer;
-        }
-        .social-link:hover { border-color: var(--neon); background: rgba(0,255,65,0.05); }
 
         #toast {
             position: fixed; top: 90px; right: -300px; 
@@ -105,7 +119,7 @@
                     <select id="size-1" class="bg-zinc-900 border border-zinc-800 p-3 text-[10px] mb-4 uppercase w-full">
                         <option value="XS">Talla XS</option><option value="S">Talla S</option><option value="M">Talla M</option>
                     </select>
-                    <button onclick="addToCart('Sudadera Boss Red', 699, 'size-1')" class="btn-main">Agregar al Carrito</button>
+                    <button onclick="addToCart('Sudadera Boss Red', 699, 'size-1', 'boss_roja.png')" class="btn-main">Agregar al Carrito</button>
                 </div>
 
                 <div class="product-card p-6 flex flex-col items-center text-center">
@@ -119,7 +133,7 @@
                     <select id="size-2" class="bg-zinc-900 border border-zinc-800 p-3 text-[10px] mb-4 uppercase w-full">
                         <option value="XS">Talla XS</option><option value="S">Talla S</option><option value="M">Talla M</option>
                     </select>
-                    <button onclick="addToCart('Playera Kenzo Tiger', 699, 'size-2')" class="btn-main">Agregar al Carrito</button>
+                    <button onclick="addToCart('Playera Kenzo Tiger', 699, 'size-2', 'kenzo_tiger.png')" class="btn-main">Agregar al Carrito</button>
                 </div>
 
                 <div class="product-card p-6 flex flex-col items-center text-center">
@@ -133,7 +147,7 @@
                     <select id="size-3" class="bg-zinc-900 border border-zinc-800 p-3 text-[10px] mb-4 uppercase w-full">
                         <option value="XS">Talla XS</option><option value="S">Talla S</option><option value="M">Talla M</option>
                     </select>
-                    <button onclick="addToCart('Sudadera Boss Cream', 699, 'size-3')" class="btn-main">Agregar al Carrito</button>
+                    <button onclick="addToCart('Sudadera Boss Cream', 699, 'size-3', 'boss_crema.png')" class="btn-main">Agregar al Carrito</button>
                 </div>
             </div>
         </section>
@@ -144,7 +158,6 @@
             <p class="text-white/40 text-xs uppercase tracking-[0.2em] leading-loose mb-16">
                 Nacimos en Nuevo León con un solo objetivo: ofrecer la calidad G5 más alta del mercado sin los precios excesivos del retail. Seleccionamos cada pieza individualmente para garantizar que el estilo y la durabilidad sean de élite.
             </p>
-            
             <div class="bg-zinc-950 p-10 border border-white/5">
                 <h4 class="text-[10px] text-white font-bold uppercase tracking-widest mb-8 italic">Guía de Tallas</h4>
                 <div class="grid grid-cols-3 text-green-500 font-black mb-6 text-[9px]">
@@ -160,46 +173,37 @@
     </main>
 
     <div id="social-modal">
-        <div class="dark-card">
+        <div class="bg-[#050505] p-10 border border-white/10 max-w-sm w-full">
             <h2 class="text-2xl font-black uppercase italic mb-8 text-center">Encuéntranos</h2>
-            <div class="space-y-2">
-                <div class="social-link" onclick="window.open('https://instagram.com/tu_usuario')">
-                    <span class="text-[10px] font-bold tracking-widest uppercase">Instagram</span>
-                    <span class="text-green-500 font-mono">@CONVICTT.MX</span>
-                </div>
-                <div class="social-link" onclick="window.open('https://tiktok.com/@tu_usuario')">
-                    <span class="text-[10px] font-bold tracking-widest uppercase">TikTok</span>
-                    <span class="text-green-500 font-mono">@CONVICTT_OFICIAL</span>
-                </div>
-                <div class="social-link">
-                    <span class="text-[10px] font-bold tracking-widest uppercase">Ubicación</span>
-                    <span class="text-green-500 font-mono text-[9px]">NUEVO LEÓN, MX</span>
-                </div>
+            <div onclick="window.open('https://instagram.com/')" class="p-4 border border-white/5 mb-2 cursor-pointer hover:border-green-500 transition-all text-center">
+                <span class="text-green-500 font-mono">INSTAGRAM: @CONVICTT.MX</span>
             </div>
-            <p class="mt-8 text-center text-[9px] opacity-30 uppercase tracking-[0.3em]">Secure Wear & Limited Supply</p>
-            <button onclick="toggleSocial()" class="btn-main mt-8 py-3 text-[9px]">Cerrar Ventana</button>
+            <button onclick="toggleSocial()" class="btn-main mt-6">Cerrar</button>
         </div>
     </div>
 
     <div id="cart-modal">
-        <div class="dark-card">
-            <h2 class="text-2xl font-black uppercase italic mb-6 text-center">Tu Bolsa</h2>
-            <div id="cart-items-container" class="max-h-[35vh] overflow-y-auto mb-6 text-xs"></div>
-            <div class="flex justify-between items-center text-lg font-black mb-6 border-t border-white/10 pt-4">
-                <span>TOTAL:</span><span id="cart-total" class="text-green-500">$0 MXN</span>
+        <div class="cart-overlay" onclick="toggleCart()"></div>
+        <div class="cart-panel">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-xl font-black uppercase italic tracking-widest">Tu Bolsa</h2>
+                <button onclick="toggleCart()" class="text-white/20 hover:text-white transition-all text-xs font-black uppercase">Cerrar</button>
             </div>
-            <button onclick="checkoutWhatsApp()" class="btn-main mb-3">Pedir por WhatsApp</button>
-            <button onclick="openPayment()" class="w-full bg-white text-black font-black uppercase py-4 text-[10px] tracking-widest mb-4">Pago Directo</button>
-            <button onclick="toggleCart()" class="w-full text-[9px] uppercase opacity-40">Cerrar</button>
-        </div>
-    </div>
-
-    <div id="payment-modal">
-        <div class="dark-card text-center border-green-500/50">
-            <h2 class="text-xl font-black italic uppercase text-green-500 mb-4">Conexión Segura</h2>
-            <div class="w-10 h-10 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-            <p class="text-[9px] uppercase tracking-widest mb-8 opacity-60">Redirigiendo a terminal de pago...</p>
-            <button onclick="closePayment()" class="btn-main text-[9px] py-3 w-auto px-8">Cancelar</button>
+            
+            <div id="cart-items-container" class="flex-1 overflow-y-auto">
+                </div>
+            
+            <div class="mt-8 pt-6 border-t border-white/10">
+                <div class="flex justify-between items-end mb-6">
+                    <div>
+                        <p class="text-[9px] uppercase tracking-widest opacity-40">Monto Total</p>
+                        <span id="cart-total" class="text-3xl font-black font-mono text-green-500">$0 MXN</span>
+                    </div>
+                </div>
+                <button onclick="checkoutWhatsApp()" class="w-full bg-green-500 text-black font-black uppercase py-5 text-[11px] tracking-[0.3em] mb-3 hover:scale-[1.02] transition-all">
+                    Finalizar Pedido
+                </button>
+            </div>
         </div>
     </div>
 
@@ -222,13 +226,16 @@
             }, 200);
         }
 
-        function addToCart(name, price, sizeId) {
+        function addToCart(name, price, sizeId, imgName) {
             const size = document.getElementById(sizeId).value;
-            cart.push({ name, price, size });
+            cart.push({ name: name, price: price, size: size, img: imgName });
             updateCartUI();
+            
             const t = document.getElementById('toast');
             t.classList.add('visible');
             setTimeout(() => t.classList.remove('visible'), 2000);
+            
+            document.getElementById('cart-modal').style.display = 'block';
         }
 
         function updateCartUI() {
@@ -236,19 +243,38 @@
             const totalEl = document.getElementById('cart-total');
             document.getElementById('cart-counter').innerText = cart.length;
             let total = 0;
-            container.innerHTML = cart.length === 0 ? '<p class="text-center opacity-20 py-10 uppercase">Vacío</p>' : '';
-            cart.forEach((item, index) => {
-                total += item.price;
-                container.innerHTML += `<div class="flex justify-between py-3 border-b border-white/5"><div><p class="font-black uppercase">${item.name}</p><p class="text-[9px] text-green-500">${item.size}</p></div><button onclick="removeItem(${index})" class="text-red-500 font-bold">X</button></div>`;
-            });
+            
+            if (cart.length === 0) {
+                container.innerHTML = '<p class="text-center opacity-20 py-20 uppercase text-[10px]">Tu bolsa está vacía</p>';
+            } else {
+                container.innerHTML = '';
+                cart.forEach((item, index) => {
+                    total += item.price;
+                    container.innerHTML += `
+                        <div class="cart-item-ui">
+                            <img src="${item.img}" style="width: 60px; height: 60px; object-fit: contain; background: #0a0a0a; border-radius: 2px;">
+                            <div class="flex-1">
+                                <p style="font-weight: 900; text-transform: uppercase; font-style: italic; font-size: 11px; color: white; margin: 0;">${item.name}</p>
+                                <p style="font-size: 9px; color: #00FF41; font-weight: 700; margin-top: 4px; text-transform: uppercase;">TALLA: ${item.size}</p>
+                                <p style="font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-top: 4px;">$${item.price}</p>
+                            </div>
+                            <button onclick="removeItem(${index})" style="color: rgba(255,255,255,0.2); font-weight: 900; font-size: 12px;">✕</button>
+                        </div>
+                    `;
+                });
+            }
             totalEl.innerText = `$${total} MXN`;
         }
 
         function removeItem(index) { cart.splice(index, 1); updateCartUI(); }
-        function toggleCart() { const m = document.getElementById('cart-modal'); m.style.display = (m.style.display === 'flex') ? 'none' : 'flex'; }
-        function toggleSocial() { const m = document.getElementById('social-modal'); m.style.display = (m.style.display === 'flex') ? 'none' : 'flex'; }
-        function openPayment() { if (cart.length > 0) document.getElementById('payment-modal').style.display = 'flex'; }
-        function closePayment() { document.getElementById('payment-modal').style.display = 'none'; }
+        function toggleCart() { 
+            const m = document.getElementById('cart-modal'); 
+            m.style.display = (m.style.display === 'block') ? 'none' : 'block'; 
+        }
+        function toggleSocial() { 
+            const m = document.getElementById('social-modal'); 
+            m.style.display = (m.style.display === 'flex') ? 'none' : 'flex'; 
+        }
 
         function checkoutWhatsApp() {
             if (cart.length === 0) return;
