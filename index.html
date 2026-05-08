@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CONVICTT | Elite Wear</title>
+    <title>CONVICTT | Urban Elite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --neon: #00FF41; }
+
         body { background: #000; color: #fff; font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; }
 
         .bg-pattern {
@@ -21,245 +22,550 @@
         header {
             position: fixed; top: 0; width: 100%; z-index: 100;
             background: rgba(0,0,0,0.9); backdrop-filter: blur(15px);
-            border-bottom: 1px solid rgba(0, 255, 65, 0.1);
+            border-bottom: 1px solid rgba(0,255,65,0.1);
         }
 
-        .content-section { display: none; opacity: 0; transform: translateY(20px); transition: all 0.5s ease; }
+        .content-section {
+            display: none; opacity: 0; transform: translateY(20px);
+            transition: opacity 0.45s ease, transform 0.45s ease;
+        }
         .content-section.active { display: flex; opacity: 1; transform: translateY(0); }
 
-        .nav-btn { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #555; cursor: pointer; transition: 0.3s; font-weight: 700; flex-shrink: 0; }
+        .nav-btn {
+            font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+            color: #555; cursor: pointer; transition: 0.3s; font-weight: 700; flex-shrink: 0;
+        }
+        .nav-btn:hover:not(.active-nav) { color: rgba(255,255,255,0.5); }
         .nav-btn.active-nav { color: var(--neon); border-bottom: 2px solid var(--neon); }
 
-        .hero-title { font-size: clamp(3.5rem, 15vw, 10rem); font-weight: 900; line-height: 0.8; letter-spacing: -0.05em; font-style: italic; }
-        
-        .product-card { border: 1px solid rgba(255, 255, 255, 0.05); background: rgba(5,5,5,0.9); transition: 0.4s; }
-        .product-card:hover { border-color: var(--neon); transform: translateY(-5px); }
+        .hero-title {
+            font-size: clamp(3.5rem, 15vw, 10rem);
+            font-weight: 900; line-height: 0.8;
+            letter-spacing: -0.05em; font-style: italic;
+        }
 
-        .btn-main { border: 1px solid var(--neon); color: var(--neon); font-size: 10px; font-weight: 900; text-transform: uppercase; padding: 15px; transition: 0.3s; width: 100%; cursor: pointer; text-align: center; }
-        .btn-main:hover { background: var(--neon); color: #000; box-shadow: 0 0 20px var(--neon); }
+        .product-card {
+            border: 1px solid rgba(255,255,255,0.05);
+            background: rgba(5,5,5,0.9);
+            transition: border-color 0.35s, transform 0.35s, box-shadow 0.35s;
+        }
+        .product-card:hover {
+            border-color: var(--neon);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0,255,65,0.07);
+        }
+        .product-card:hover .product-img { transform: scale(1.04); }
+        .product-img { transition: transform 0.5s ease; display: block; }
+
+        .btn-main {
+            border: 1px solid var(--neon); color: var(--neon);
+            font-size: 10px; font-weight: 900; text-transform: uppercase;
+            padding: 15px; transition: 0.3s; width: 100%; cursor: pointer;
+            text-align: center; background: transparent; letter-spacing: 2px;
+            font-family: 'Inter', sans-serif;
+        }
+        .btn-main:hover {
+            background: var(--neon); color: #000;
+            box-shadow: 0 0 22px rgba(0,255,65,0.35);
+        }
+
+        /* Botón regresar — idioma visual original */
+        .btn-back {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.18em; color: #444; cursor: pointer;
+            background: none; border: none; padding: 0; transition: color 0.25s;
+        }
+        .btn-back::before { content: '←'; font-size: 13px; }
+        .btn-back:hover { color: var(--neon); }
 
         #cart-modal { display: none; position: fixed; inset: 0; z-index: 300; }
         .cart-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); }
-        .cart-panel { 
-            position: absolute; right: 0; top: 0; bottom: 0; 
-            width: 100%; max-width: 420px; background: #000; 
+        .cart-panel {
+            position: absolute; right: 0; top: 0; bottom: 0;
+            width: 100%; max-width: 420px; background: #000;
             border-left: 1px solid rgba(0,255,65,0.2);
             display: flex; flex-direction: column; padding: 30px;
         }
 
         #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 1000; }
-        .toast { background: var(--neon); color: #000; padding: 12px 25px; font-weight: 900; font-size: 10px; text-transform: uppercase; margin-top: 10px; }
+        .toast {
+            background: var(--neon); color: #000;
+            padding: 12px 25px; font-weight: 900; font-size: 10px;
+            text-transform: uppercase; margin-top: 10px; letter-spacing: 0.12em;
+            animation: toastSlide 0.3s ease;
+        }
+        @keyframes toastSlide {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
 
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 500; align-items: center; justify-content: center; }
-        .modal-content { background: #080808; border: 1px solid rgba(0, 255, 65, 0.2); padding: 40px; width: 90%; max-width: 400px; text-align: center; }
+        .modal {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.98); z-index: 500;
+            align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: #080808; border: 1px solid rgba(0,255,65,0.2);
+            padding: 40px; width: 90%; max-width: 400px; text-align: center;
+        }
+
+        select {
+            color: #fff; appearance: none; -webkit-appearance: none;
+            background-color: #0a0a0a;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2300FF41'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 12px center;
+            cursor: pointer; transition: border-color 0.2s;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        select:hover { border-color: rgba(0,255,65,0.3) !important; }
+        select:focus { outline: none; border-color: rgba(0,255,65,0.5) !important; }
+        select option { background: #000; }
+
         .no-scrollbar::-webkit-scrollbar { display: none; }
+        ::-webkit-scrollbar { width: 3px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,255,65,0.25); }
+
+        /* Dot pulsante */
+        .live-dot {
+            display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+            background: var(--neon); flex-shrink: 0;
+            animation: livePulse 1.8s ease-in-out infinite;
+        }
+        @keyframes livePulse {
+            0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0,255,65,0.5); }
+            50%      { opacity: 0.7; box-shadow: 0 0 0 5px rgba(0,255,65,0); }
+        }
+
+        /* Price badge */
+        .price-badge {
+            display: inline-block; font-family: 'JetBrains Mono', monospace;
+            font-size: 8px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
+            color: var(--neon); border: 1px solid rgba(0,255,65,0.25);
+            background: rgba(0,255,65,0.06); padding: 2px 8px;
+        }
+
+        /* Tabla de tallas */
+        .tallas-table { width: 100%; border-collapse: collapse; }
+        .tallas-table th {
+            font-size: 9px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.2em; color: var(--neon); padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            text-align: left; font-family: 'JetBrains Mono', monospace;
+        }
+        .tallas-table td {
+            font-size: 11px; padding: 11px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            opacity: 0.5; font-family: 'JetBrains Mono', monospace;
+        }
+        .tallas-table tr:last-child td { border-bottom: none; }
+
+        /* Animaciones de entrada en hero */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(28px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        #hero.active .anim-1 { animation: fadeUp 0.55s 0.05s ease both; }
+        #hero.active .anim-2 { animation: fadeUp 0.65s 0.18s ease both; }
+        #hero.active .anim-3 { animation: fadeUp 0.55s 0.3s  ease both; }
+        #hero.active .anim-4 { animation: fadeUp 0.55s 0.42s ease both; }
+
+        /* Línea divisora neon */
+        .neon-line {
+            width: 36px; height: 1px; background: var(--neon);
+            margin: 0 auto 10px; opacity: 0.5;
+        }
+
+        /* Scanlines sutiles en hero */
+        .hero-scanlines {
+            position: absolute; inset: 0; pointer-events: none;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent 0, transparent 3px,
+                rgba(0,0,0,0.03) 3px, rgba(0,0,0,0.03) 4px
+            );
+            z-index: 0;
+        }
     </style>
 </head>
 <body>
 
-    <div class="bg-pattern">
-        CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT
-        CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT
-        CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT
-    </div>
+<div class="bg-pattern">
+    CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT
+    CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT
+    CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT
+    CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT CONVICTT
+</div>
 
-    <div id="toast-container"></div>
+<div id="toast-container"></div>
 
-    <header>
-        <nav class="p-6 flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto gap-4">
+<!-- HEADER -->
+<header>
+    <nav class="p-6 flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto gap-4">
+        <div class="flex items-center gap-3">
+            <span class="live-dot"></span>
             <div class="border-l-2 border-green-500 pl-3 font-mono text-[10px] text-green-500" id="clock">00:00:00</div>
-            <div class="flex gap-6 md:gap-8 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 no-scrollbar justify-center">
-                <span onclick="showSection('hero')" class="nav-btn active-nav" id="btn-hero">Inicio</span>
-                <span onclick="showSection('catalog')" class="nav-btn" id="btn-catalog">Colección</span>
-                <span onclick="toggleModal('social-modal')" class="nav-btn">Redes</span>
-                <span onclick="showSection('about')" class="nav-btn" id="btn-about">Nosotros</span>
-                <span onclick="toggleCart()" class="nav-btn" style="color:white">🛒(<span id="cart-counter">0</span>)</span>
-            </div>
-        </nav>
-    </header>
+        </div>
+        <div class="flex gap-6 md:gap-8 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 no-scrollbar justify-center">
+            <span onclick="showSection('hero')" class="nav-btn active-nav" id="btn-hero">Inicio</span>
+            <span onclick="showSection('catalog')" class="nav-btn" id="btn-catalog">Colección</span>
+            <span onclick="toggleModal('social-modal')" class="nav-btn">Redes</span>
+            <span onclick="showSection('about')" class="nav-btn" id="btn-about">Nosotros</span>
+            <span onclick="toggleCart()" class="nav-btn" style="color:white">🛒 (<span id="cart-counter">0</span>)</span>
+        </div>
+    </nav>
+</header>
 
-    <main class="pt-24">
-        <section id="hero" class="content-section active min-h-[85vh] flex-col justify-center items-center text-center px-6">
-            <img src="logo_convictt.png" class="max-w-[170px] md:max-w-[320px] mb-8 drop-shadow-[0_0_30px_rgba(0,255,65,0.2)]">
-            <h1 class="hero-title uppercase italic">CONVICTT</h1>
-            <p class="mt-6 text-[10px] text-green-500 uppercase tracking-[1.2em] font-bold">Elite G5 Supply // NL</p>
-            <button onclick="showSection('catalog')" class="mt-12 btn-main w-auto px-12 tracking-[0.3em]">Entrar al Catálogo</button>
-        </section>
+<main class="pt-24">
 
-        <section id="catalog" class="content-section max-w-7xl mx-auto px-6 py-20 flex-col pt-32">
-            <h2 class="text-center text-4xl font-black italic mb-16 uppercase tracking-tighter w-full">Lanzamiento 01</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-                <div class="product-card p-6 flex flex-col items-center text-center">
-                    <img src="boss_roja.png" class="w-full aspect-square object-contain p-4 mb-6">
-                    <h3 class="font-black uppercase italic text-lg text-center">Sudadera Boss Red</h3>
-                    <p class="text-[9px] text-green-500 mb-4 font-bold uppercase tracking-widest italic">G5 Original Quality</p>
-                    <div class="text-center mb-6">
-                        <p class="text-[9px] opacity-40 uppercase line-through">$1,299</p>
-                        <p class="text-xl font-black font-mono text-white">Preventa: <span class="text-green-500">$699</span></p>
-                    </div>
-                    <select id="size-1" class="bg-zinc-900 border border-zinc-800 p-3 text-[10px] mb-4 w-full uppercase outline-none">
-                        <option value="XS">Talla XS</option><option value="S">Talla S</option><option value="M">Talla M</option>
-                    </select>
-                    <button onclick="addToCart('Sudadera Boss Red', 699, 'size-1', 'boss_roja.png')" class="btn-main w-full">Agregar</button>
-                </div>
+    <!-- HERO -->
+    <section id="hero" class="content-section active min-h-[88vh] flex-col justify-center items-center text-center px-6 relative overflow-hidden">
+        <div class="hero-scanlines"></div>
 
-                <div class="product-card p-6 flex flex-col items-center text-center">
-                    <img src="kenzo_tiger.png" class="w-full aspect-square object-contain p-4 mb-6">
-                    <h3 class="font-black uppercase italic text-lg text-center">Playera Kenzo Tiger</h3>
-                    <p class="text-[9px] text-green-500 mb-4 font-bold uppercase tracking-widest italic">Bordado High-End G5</p>
-                    <div class="text-center mb-6">
-                        <p class="text-[9px] opacity-40 uppercase line-through">$1,100</p>
-                        <p class="text-xl font-black font-mono text-white">Preventa: <span class="text-green-500">$699</span></p>
-                    </div>
-                    <select id="size-2" class="bg-zinc-900 border border-zinc-800 p-3 text-[10px] mb-4 w-full uppercase outline-none">
-                        <option value="XS">Talla XS</option><option value="S">Talla S</option><option value="M">Talla M</option>
-                    </select>
-                    <button onclick="addToCart('Playera Kenzo Tiger', 699, 'size-2', 'kenzo_tiger.png')" class="btn-main w-full">Agregar</button>
-                </div>
+        <img src="logo_convictt.png"
+            class="anim-1 max-w-[170px] md:max-w-[300px] mb-6 relative z-10"
+            style="filter: drop-shadow(0 0 30px rgba(0,255,65,0.2));"
+            alt="CONVICTT">
 
-                <div class="product-card p-6 flex flex-col items-center text-center">
-                    <img src="boss_crema.png" class="w-full aspect-square object-contain p-4 mb-6">
-                    <h3 class="font-black uppercase italic text-lg text-center">Sudadera Boss Cream</h3>
-                    <p class="text-[9px] text-green-500 mb-4 font-bold uppercase tracking-widest italic">Oversized Fit G5 Supply</p>
-                    <div class="text-center mb-6">
-                        <p class="text-[9px] opacity-40 uppercase line-through">$1,299</p>
-                        <p class="text-xl font-black font-mono text-white">Preventa: <span class="text-green-500">$699</span></p>
-                    </div>
-                    <select id="size-3" class="bg-zinc-900 border border-zinc-800 p-3 text-[10px] mb-4 w-full uppercase outline-none">
-                        <option value="XS">Talla XS</option><option value="S">Talla S</option><option value="M">Talla M</option>
-                    </select>
-                    <button onclick="addToCart('Sudadera Boss Cream', 699, 'size-3', 'boss_crema.png')" class="btn-main w-full">Agregar</button>
-                </div>
-            </div>
-        </section>
+        <div class="neon-line anim-2 relative z-10"></div>
+        <h1 class="hero-title uppercase italic anim-2 relative z-10">CONVICTT</h1>
 
-        <section id="about" class="content-section max-w-4xl mx-auto px-6 py-20 flex-col text-center pt-32">
-            <h2 class="text-green-500 font-bold uppercase tracking-[0.5em] mb-12 italic w-full">// NOSOTROS //</h2>
-            <div class="bg-black/80 p-10 border border-white/5 w-full">
-                <p class="text-2xl font-black italic mb-8 uppercase tracking-tighter">EL NUEVO ESTÁNDAR URBANO.</p>
-                <div class="grid grid-cols-3 text-green-500 font-black mb-6 text-[10px] border-b border-white/10 pb-4">
-                    <span>TALLA</span><span>PECHO (CM)</span><span>LARGO (CM)</span>
-                </div>
-                <div class="grid grid-cols-3 opacity-50 text-[11px] gap-y-6">
-                    <span>XS</span><span>90</span><span>65</span>
-                    <span>S</span><span>95</span><span>67</span>
-                    <span>M</span><span>100</span><span>70</span>
-                </div>
-                <p class="text-[9px] mt-10 opacity-40 leading-relaxed uppercase tracking-[0.3em]">
-                    CONVICTT // NUEVO LEÓN, MÉXICO. CALIDAD G5 SIN COMPROMISOS.
-                </p>
-            </div>
-        </section>
-    </main>
+        <p class="anim-3 mt-5 text-[10px] text-green-500 uppercase tracking-[1.2em] font-bold font-mono relative z-10">
+            Elite G5 Supply // NL
+        </p>
 
-    <div id="cart-modal">
-        <div class="cart-overlay" onclick="toggleCart()"></div>
-        <div class="cart-panel">
-            <h2 class="text-2xl font-black uppercase italic mb-8 tracking-tighter">Tu Bolsa</h2>
-            <div id="cart-items" class="flex-1 overflow-y-auto space-y-4 mb-6"></div>
-            <div class="border-t border-white/10 pt-6">
-                <div class="flex justify-between items-center mb-6">
-                    <span class="uppercase text-[10px] opacity-50 font-bold">Monto Total</span>
-                    <span id="cart-total" class="text-3xl font-black font-mono text-green-500">$0 MXN</span>
-                </div>
-                <button onclick="checkoutWhatsApp()" class="btn-main w-full">Finalizar Pedido (WhatsApp)</button>
-                <button onclick="toggleCart()" class="text-[9px] uppercase tracking-widest mt-4 opacity-30 w-full hover:opacity-100 transition">Seguir Comprando</button>
+        <button onclick="showSection('catalog')"
+            class="anim-4 mt-12 btn-main w-auto px-12 tracking-[0.3em] relative z-10">
+            Entrar al Catálogo
+        </button>
+
+        <div class="absolute bottom-8 right-8 hidden md:flex flex-col items-end gap-1 z-10">
+            <p class="font-mono text-[8px] text-green-500/40 uppercase tracking-[0.3em]">Drop 01 // Activo</p>
+            <p class="font-mono text-[8px] text-white/15 uppercase tracking-[0.2em]">Piezas Limitadas</p>
+        </div>
+    </section>
+
+    <!-- CATÁLOGO -->
+    <section id="catalog" class="content-section max-w-7xl mx-auto px-6 py-20 flex-col pt-32">
+
+        <div class="w-full mb-6">
+            <button class="btn-back" onclick="showSection('hero')">Regresar al Inicio</button>
+        </div>
+
+        <div class="w-full flex flex-col sm:flex-row sm:items-center justify-between mb-14 gap-3">
+            <h2 class="text-4xl font-black italic uppercase tracking-tighter">
+                Lanzamiento <span style="color:var(--neon)">01</span>
+            </h2>
+            <div class="flex items-center gap-2">
+                <span class="live-dot"></span>
+                <span class="font-mono text-[9px] text-green-500 uppercase tracking-widest">Preventa Activa</span>
             </div>
         </div>
-    </div>
 
-    <div id="social-modal" class="modal" onclick="if(event.target==this) toggleModal('social-modal')">
-        <div class="modal-content relative">
-            <h2 class="text-2xl font-black uppercase italic mb-8 tracking-tighter">Conéctate</h2>
-            <div class="space-y-4">
-                <div onclick="window.open('https://instagram.com/convictt.mx')" class="flex items-center justify-between p-5 border border-white/5 bg-white/5 hover:border-green-500 transition-all cursor-pointer">
-                    <p class="text-[11px] font-black uppercase">Instagram</p>
-                    <span class="text-green-500">→</span>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+
+            <!-- Boss Red -->
+            <div class="product-card p-6 flex flex-col items-center text-center">
+                <div class="w-full aspect-square overflow-hidden mb-6 bg-zinc-950/60 flex items-center justify-center">
+                    <img src="boss_roja.png" class="product-img w-full aspect-square object-contain p-4">
                 </div>
-                <div onclick="window.open('https://wa.me/5218121513089')" class="flex items-center justify-between p-5 border border-white/5 bg-white/5 hover:border-green-500 transition-all cursor-pointer">
-                    <p class="text-[11px] font-black uppercase">WhatsApp</p>
-                    <span class="text-green-500">→</span>
+                <h3 class="font-black uppercase italic text-lg mb-1">Sudadera Boss Red</h3>
+                <p class="text-[9px] text-green-500 font-bold uppercase tracking-widest italic font-mono mb-3">G5 Original Quality</p>
+                <span class="price-badge mb-3">Preventa</span>
+                <div class="text-center mb-5">
+                    <p class="text-[9px] opacity-30 uppercase line-through font-mono">$1,299 MXN</p>
+                    <p class="text-xl font-black font-mono text-white mt-1">
+                        Preventa: <span class="text-green-500">$699</span>
+                    </p>
                 </div>
+                <select id="size-1" class="border border-zinc-800 p-3 text-[10px] mb-4 w-full uppercase outline-none">
+                    <option value="XS">Talla XS</option>
+                    <option value="S">Talla S</option>
+                    <option value="M">Talla M</option>
+                </select>
+                <button onclick="addToCart('Sudadera Boss Red', 699, 'size-1', 'boss_roja.png')" class="btn-main w-full">
+                    Agregar
+                </button>
             </div>
-            <button onclick="toggleModal('social-modal')" class="btn-main mt-10">Cerrar Ventana</button>
+
+            <!-- Kenzo Tiger -->
+            <div class="product-card p-6 flex flex-col items-center text-center">
+                <div class="w-full aspect-square overflow-hidden mb-6 bg-zinc-950/60 flex items-center justify-center">
+                    <img src="kenzo_tiger.png" class="product-img w-full aspect-square object-contain p-4">
+                </div>
+                <h3 class="font-black uppercase italic text-lg mb-1">Playera Kenzo Tiger</h3>
+                <p class="text-[9px] text-green-500 font-bold uppercase tracking-widest italic font-mono mb-3">Bordado High-End G5</p>
+                <span class="price-badge mb-3">Preventa</span>
+                <div class="text-center mb-5">
+                    <p class="text-[9px] opacity-30 uppercase line-through font-mono">$1,100 MXN</p>
+                    <p class="text-xl font-black font-mono text-white mt-1">
+                        Preventa: <span class="text-green-500">$699</span>
+                    </p>
+                </div>
+                <select id="size-2" class="border border-zinc-800 p-3 text-[10px] mb-4 w-full uppercase outline-none">
+                    <option value="XS">Talla XS</option>
+                    <option value="S">Talla S</option>
+                    <option value="M">Talla M</option>
+                </select>
+                <button onclick="addToCart('Playera Kenzo Tiger', 699, 'size-2', 'kenzo_tiger.png')" class="btn-main w-full">
+                    Agregar
+                </button>
+            </div>
+
+            <!-- Boss Cream -->
+            <div class="product-card p-6 flex flex-col items-center text-center">
+                <div class="w-full aspect-square overflow-hidden mb-6 bg-zinc-950/60 flex items-center justify-center">
+                    <img src="boss_crema.png" class="product-img w-full aspect-square object-contain p-4">
+                </div>
+                <h3 class="font-black uppercase italic text-lg mb-1">Sudadera Boss Cream</h3>
+                <p class="text-[9px] text-green-500 font-bold uppercase tracking-widest italic font-mono mb-3">Oversized Fit G5 Supply</p>
+                <span class="price-badge mb-3">Preventa</span>
+                <div class="text-center mb-5">
+                    <p class="text-[9px] opacity-30 uppercase line-through font-mono">$1,299 MXN</p>
+                    <p class="text-xl font-black font-mono text-white mt-1">
+                        Preventa: <span class="text-green-500">$699</span>
+                    </p>
+                </div>
+                <select id="size-3" class="border border-zinc-800 p-3 text-[10px] mb-4 w-full uppercase outline-none">
+                    <option value="XS">Talla XS</option>
+                    <option value="S">Talla S</option>
+                    <option value="M">Talla M</option>
+                </select>
+                <button onclick="addToCart('Sudadera Boss Cream', 699, 'size-3', 'boss_crema.png')" class="btn-main w-full">
+                    Agregar
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Acceso exclusivo -->
+        <div class="mt-20 w-full border border-white/5 bg-black/60 p-10 text-center">
+            <p class="font-mono text-[9px] text-green-500 uppercase tracking-[0.4em] mb-4">// Acceso Exclusivo //</p>
+            <h3 class="text-2xl font-black italic uppercase tracking-tighter mb-3">Únete a la Élite</h3>
+            <p class="text-[10px] opacity-40 uppercase tracking-[0.25em] font-mono mb-8 leading-relaxed">
+                Debes confirmar tu preventa para asegurar tu lugar en el Drop 01.<br>
+                Las piezas son limitadas y no habrá re-stock.
+            </p>
+            <button onclick="window.open('https://wa.me/5218121513089?text=Hola CONVICTT, quiero confirmar mi preventa para el Drop 01')"
+                class="btn-main w-auto px-12 tracking-[0.3em]">
+                Confirmar Preventa
+            </button>
+        </div>
+
+    </section>
+
+    <!-- NOSOTROS -->
+    <section id="about" class="content-section max-w-4xl mx-auto px-6 py-20 flex-col pt-32">
+
+        <div class="w-full mb-6">
+            <button class="btn-back" onclick="showSection('hero')">Regresar al Inicio</button>
+        </div>
+
+        <h2 class="text-green-500 font-bold uppercase tracking-[0.5em] mb-12 italic w-full font-mono text-sm">
+            // NOSOTROS //
+        </h2>
+
+        <div class="bg-black/80 p-10 border border-white/5 w-full">
+            <p class="text-2xl font-black italic mb-6 uppercase tracking-tighter">EL NUEVO ESTÁNDAR URBANO.</p>
+            <p class="text-[10px] opacity-40 uppercase tracking-[0.25em] font-mono mb-10 leading-relaxed">
+                CONVICTT nació en Nuevo León con una sola convicción: que el estilo no tiene dueño.<br>
+                Calidad G5, piezas limitadas, sin restock.
+            </p>
+
+            <p class="font-mono text-[9px] text-green-500 uppercase tracking-[0.35em] mb-5">// Guía de Tallas //</p>
+            <table class="tallas-table mb-2">
+                <thead>
+                    <tr>
+                        <th>Talla</th>
+                        <th>Pecho (cm)</th>
+                        <th>Largo (cm)</th>
+                        <th>Manga (cm)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>XS</td><td>90</td><td>65</td><td>60</td></tr>
+                    <tr><td>S</td><td>95</td><td>67</td><td>62</td></tr>
+                    <tr><td>M</td><td>100</td><td>70</td><td>64</td></tr>
+                </tbody>
+            </table>
+
+            <p class="text-[9px] mt-10 opacity-30 leading-relaxed uppercase tracking-[0.3em] font-mono">
+                CONVICTT // NUEVO LEÓN, MÉXICO. CALIDAD G5 SIN COMPROMISOS.
+            </p>
+        </div>
+
+        <div class="mt-8 w-full flex flex-col sm:flex-row gap-4">
+            <button onclick="showSection('catalog')" class="btn-main flex-1 tracking-[0.2em]">
+                Ver Colección →
+            </button>
+            <button onclick="toggleModal('social-modal')" class="btn-main flex-1 tracking-[0.2em]">
+                Nuestras Redes
+            </button>
+        </div>
+
+    </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="border-t border-white/5 py-8 px-6 text-center">
+    <p class="font-mono text-[9px] text-white/20 uppercase tracking-[0.4em]">
+        © 2026 CONVICTT // NLE_MEX — TODOS LOS DERECHOS RESERVADOS
+    </p>
+</footer>
+
+<!-- CARRITO -->
+<div id="cart-modal">
+    <div class="cart-overlay" onclick="toggleCart()"></div>
+    <div class="cart-panel">
+        <div class="flex items-center justify-between mb-8">
+            <h2 class="text-2xl font-black uppercase italic tracking-tighter">Tu Bolsa</h2>
+            <button onclick="toggleCart()" class="font-mono text-[9px] text-white/30 uppercase tracking-widest hover:text-white transition cursor-pointer bg-none border-none">
+                [ cerrar ]
+            </button>
+        </div>
+        <div id="cart-items" class="flex-1 overflow-y-auto space-y-4 mb-6 no-scrollbar"></div>
+        <div class="border-t border-white/10 pt-6">
+            <div class="flex justify-between items-center mb-6">
+                <span class="uppercase text-[10px] opacity-50 font-bold font-mono">Monto Total</span>
+                <span id="cart-total" class="text-3xl font-black font-mono text-green-500">$0 MXN</span>
+            </div>
+            <button onclick="checkoutWhatsApp()" class="btn-main w-full mb-3">Finalizar Pedido (WhatsApp)</button>
+            <button onclick="toggleCart()" class="text-[9px] uppercase tracking-widest mt-2 opacity-30 w-full hover:opacity-80 transition font-mono cursor-pointer bg-none border-none">
+                ← Seguir Comprando
+            </button>
         </div>
     </div>
+</div>
 
-    <script>
-        let cart = [];
+<!-- MODAL REDES -->
+<div id="social-modal" class="modal" onclick="if(event.target==this) toggleModal('social-modal')">
+    <div class="modal-content relative">
+        <button onclick="toggleModal('social-modal')"
+            class="absolute top-4 right-4 font-mono text-[9px] text-white/30 hover:text-white transition uppercase tracking-widest cursor-pointer bg-none border-none">
+            [ × ]
+        </button>
+        <h2 class="text-2xl font-black uppercase italic mb-8 tracking-tighter">Conéctate</h2>
+        <div class="space-y-4">
+            <div onclick="window.open('https://instagram.com/convictt.mx')"
+                class="flex items-center justify-between p-5 border border-white/5 bg-white/5 hover:border-green-500 hover:bg-green-500/5 transition-all cursor-pointer group">
+                <p class="text-[11px] font-black uppercase tracking-widest">Instagram</p>
+                <span class="text-green-500 group-hover:translate-x-1 transition-transform inline-block">→</span>
+            </div>
+            <div onclick="window.open('https://wa.me/5218121513089')"
+                class="flex items-center justify-between p-5 border border-white/5 bg-white/5 hover:border-green-500 hover:bg-green-500/5 transition-all cursor-pointer group">
+                <p class="text-[11px] font-black uppercase tracking-widest">WhatsApp</p>
+                <span class="text-green-500 group-hover:translate-x-1 transition-transform inline-block">→</span>
+            </div>
+        </div>
+        <button onclick="toggleModal('social-modal')" class="btn-main mt-10">Cerrar Ventana</button>
+    </div>
+</div>
 
-        function showSection(id) {
-            document.querySelectorAll('.content-section').forEach(s => { s.classList.remove('active'); s.style.display = 'none'; });
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-nav'));
-            const target = document.getElementById(id);
-            target.style.display = 'flex';
-            setTimeout(() => target.classList.add('active'), 50);
-            document.getElementById('btn-' + id).classList.add('active-nav');
-            window.scrollTo(0,0);
+<script>
+    let cart = [];
+
+    function showSection(id) {
+        document.querySelectorAll('.content-section').forEach(s => {
+            s.classList.remove('active');
+            s.style.display = 'none';
+        });
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-nav'));
+
+        const target = document.getElementById(id);
+        target.style.display = 'flex';
+        target.getBoundingClientRect(); // forzar reflow
+        target.classList.add('active');
+
+        const nb = document.getElementById('btn-' + id);
+        if (nb) nb.classList.add('active-nav');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function addToCart(name, price, sizeId, img) {
+        const size = document.getElementById(sizeId).value;
+        cart.push({ name, price, size, img });
+        updateCartUI();
+        showToast(`+ ${name} (${size}) agregado`);
+    }
+
+    function updateCartUI() {
+        const container = document.getElementById('cart-items');
+        const counter   = document.getElementById('cart-counter');
+        const totalEl   = document.getElementById('cart-total');
+
+        counter.innerText = cart.length;
+
+        if (cart.length === 0) {
+            container.innerHTML = '<p class="opacity-20 text-center py-10 uppercase text-[10px] font-mono tracking-widest">— Bolsa vacía —</p>';
+            totalEl.innerText = '$0 MXN';
+            return;
         }
 
-        function addToCart(name, price, sizeId, img) {
-            const size = document.getElementById(sizeId).value;
-            cart.push({ name, price, size, img });
-            updateCartUI();
-            showToast(`+ ${name} (${size}) agregado`);
-        }
+        let total = 0;
+        container.innerHTML = '';
+        cart.forEach((item, index) => {
+            total += item.price;
+            container.innerHTML += `
+            <div class="flex items-center gap-4 bg-zinc-950 p-4 border border-white/5 hover:border-white/10 transition">
+                <img src="${item.img}" class="w-12 h-12 object-contain flex-shrink-0">
+                <div class="flex-1 min-w-0">
+                    <p class="text-[11px] font-black uppercase italic truncate">${item.name}</p>
+                    <p class="text-green-500 text-[9px] uppercase font-mono mt-1">Talla ${item.size} · $${item.price} MXN</p>
+                </div>
+                <button onclick="removeItem(${index})" class="text-white/20 hover:text-red-400 transition text-xs font-mono flex-shrink-0">✕</button>
+            </div>`;
+        });
+        totalEl.innerText = `$${total.toLocaleString('es-MX')} MXN`;
+    }
 
-        function updateCartUI() {
-            const container = document.getElementById('cart-items');
-            const counter = document.getElementById('cart-counter');
-            const totalEl = document.getElementById('cart-total');
-            
-            counter.innerText = cart.length;
-            container.innerHTML = cart.length === 0 ? '<p class="opacity-20 text-center py-10 uppercase text-[10px]">Tu bolsa está vacía</p>' : '';
-            
-            let total = 0;
-            cart.forEach((item, index) => {
-                total += item.price;
-                container.innerHTML += `
-                <div class="flex items-center gap-4 bg-zinc-950 p-4 border border-white/5">
-                    <img src="${item.img}" class="w-12 h-12 object-contain">
-                    <div class="flex-1">
-                        <p class="text-[11px] font-black uppercase italic">${item.name}</p>
-                        <p class="text-green-500 text-[9px] uppercase">Talla ${item.size} - $${item.price}</p>
-                    </div>
-                    <button onclick="removeItem(${index})" class="text-red-500 opacity-50 text-xs">✕</button>
-                </div>`;
-            });
-            totalEl.innerText = `$${total} MXN`;
-        }
+    function removeItem(index) {
+        cart.splice(index, 1);
+        updateCartUI();
+    }
 
-        function removeItem(index) { cart.splice(index, 1); updateCartUI(); }
+    function toggleCart() {
+        const m = document.getElementById('cart-modal');
+        m.style.display = m.style.display === 'block' ? 'none' : 'block';
+        updateCartUI();
+    }
 
-        function toggleCart() {
-            const m = document.getElementById('cart-modal');
-            m.style.display = m.style.display === 'block' ? 'none' : 'block';
-        }
+    function toggleModal(id) {
+        const m = document.getElementById(id);
+        m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+    }
 
-        function toggleModal(id) {
-            const m = document.getElementById(id);
-            m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
-        }
+    function showToast(msg) {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = msg;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.transition = 'opacity 0.3s';
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }, 2700);
+    }
 
-        function showToast(msg) {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.innerText = msg;
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
+    function checkoutWhatsApp() {
+        if (cart.length === 0) { showToast('Tu bolsa está vacía'); return; }
+        let msg = 'Hola CONVICTT, quiero realizar este pedido:%0A%0A';
+        cart.forEach(i => msg += `• ${i.name} (Talla ${i.size}) - $${i.price} MXN%0A`);
+        const total = cart.reduce((s, i) => s + i.price, 0);
+        msg += `%0ATOTAL: $${total.toLocaleString('es-MX')} MXN%0A%0ADrop 01 — Preventa`;
+        window.open(`https://wa.me/5218121513089?text=${msg}`, '_blank');
+    }
 
-        function checkoutWhatsApp() {
-            if(cart.length === 0) return;
-            let msg = "Hola CONVICTT, quiero realizar este pedido:%0A";
-            cart.forEach(i => msg += `• ${i.name} (Talla ${i.size})%0A`);
-            msg += `%0ATOTAL: ${document.getElementById('cart-total').innerText}`;
-            window.open(`https://wa.me/5218121513089?text=${msg}`, '_blank');
-        }
-
-        function updateClock() { document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-GB', { hour12: false }); }
-        setInterval(updateClock, 1000); updateClock();
-    </script>
+    function updateClock() {
+        document.getElementById('clock').innerText =
+            new Date().toLocaleTimeString('en-GB', { hour12: false });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+    updateCartUI();
+</script>
 </body>
 </html>
